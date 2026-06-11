@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>קוקפיט תמחור — דוח מנהל</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Rubik:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F6F9; --surface:#FFFFFF;
+    --ink:#171A21; --muted:#69707C; --faint:#9BA2AE;
+    --line:#E7EAEF; --line-2:#F1F3F6; --hover:#F2F5F9;
+    --teal:#3A54C9; --teal-soft:#5B72E0; --amber:#C77A12; --track:#EAEDF2;
+    --red:#D5402F; --red-bg:#FCEDEB; --red-ink:#A33124; --red-line:#EEB9B0;
+    --amber-bg:#FCF3E3; --amber-ink:#8A5712; --amber-line:#EBD3A0;
+    --shadow:0 1px 2px rgba(20,25,40,.04), 0 10px 30px rgba(20,25,40,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:"Assistant",-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  body{padding:34px 22px 60px;
+    background-image:radial-gradient(circle at 92% -8%, rgba(58,84,201,.06), transparent 42%),radial-gradient(circle at 0% 2%, rgba(58,84,201,.03), transparent 34%)}
+  .wrap{max-width:1200px;margin:0 auto}
+  header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:20px}
+  h1{font-family:"Rubik",system-ui,sans-serif;font-weight:900;font-size:34px;letter-spacing:-.01em;line-height:1}
+  .sub{color:var(--muted);font-size:14px;margin-top:7px}
+  .sub b{color:var(--ink);font-weight:500}
+  .tag{display:inline-block;font-size:11.5px;font-weight:600;color:var(--teal);background:rgba(15,122,99,.1);padding:3px 11px;border-radius:999px;margin-bottom:9px}
+  .asof{text-align:left;font-size:12.5px;color:var(--muted);line-height:1.85}
+  .asof b{color:var(--ink);font-weight:500}
+
+  .alertbar{display:flex;align-items:center;gap:12px;padding:13px 18px;border-radius:13px;margin-bottom:18px;font-size:14px;line-height:1.55}
+  .alertbar.red{background:var(--red-bg);border:1px solid var(--red-line);color:var(--red-ink)}
+  .alertbar.amber{background:var(--amber-bg);border:1px solid var(--amber-line);color:var(--amber-ink)}
+  .alertbar b{font-weight:700}
+  .alertbar .abdot{width:9px;height:9px;border-radius:50%;background:currentColor;flex:none;box-shadow:0 0 0 4px rgba(0,0,0,.05)}
+
+  .strip{display:flex;flex-wrap:wrap;align-items:center;gap:8px 26px;padding:15px 20px;background:var(--surface);
+    border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);margin-bottom:24px}
+  .stat .l{font-size:12px;color:var(--muted)}
+  .stat .v{font-family:"Rubik",system-ui,sans-serif;font-weight:700;font-size:23px;font-feature-settings:"tnum";line-height:1.1}
+  .stat .v u{font-family:"Assistant";font-size:12px;color:var(--faint);font-weight:400;text-decoration:none;margin-inline-start:3px}
+  .stat .v.warn{color:var(--amber)}
+  .strip .div{width:1px;align-self:stretch;background:var(--line)}
+
+  h2{font-family:"Rubik",system-ui,sans-serif;font-weight:700;font-size:20px;margin:0 0 4px}
+  .sectsub{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+
+  .ladder{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:30px}
+  .lcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .lcard::before{content:"";position:absolute;inset-block-start:0;inset-inline-start:0;width:100%;height:3px;background:var(--teal-soft)}
+  .lcard.red::before{background:var(--red)} .lcard.amber::before{background:var(--amber)}
+  .lcard .fm{font-family:"Rubik",system-ui,sans-serif;font-weight:700;font-size:18px}
+  .lcard .dl{font-size:12px;color:var(--muted);margin-top:3px}
+  .lcard .big{font-family:"Rubik",system-ui,sans-serif;font-weight:900;font-size:34px;line-height:1;margin-top:14px;font-feature-settings:"tnum"}
+  .lcard .big u{font-family:"Assistant";font-size:13px;color:var(--faint);font-weight:400;text-decoration:none;margin-inline-start:4px}
+  .lcard .days{display:inline-block;margin-top:11px;font-size:12px;font-weight:600;padding:4px 11px;border-radius:999px;background:var(--line-2);color:var(--muted)}
+  .lcard.red .days{background:var(--red-bg);color:var(--red-ink)}
+  .lcard.amber .days{background:var(--amber-bg);color:var(--amber-ink)}
+  .lcard .bd{margin-top:11px;font-size:11.5px;color:var(--muted);line-height:1.7;border-top:1px dashed var(--line);padding-top:9px}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:760px}
+  thead th{font-size:12px;font-weight:600;color:var(--muted);text-align:right;padding:15px 16px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  thead th.n{text-align:left}
+  tbody td{padding:15px 16px;border-bottom:1px solid var(--line-2);font-size:15px;font-feature-settings:"tnum";white-space:nowrap}
+  tbody td.n{text-align:left;font-weight:500}
+  tbody tr.crow{cursor:pointer;transition:background .15s}
+  tbody tr.crow:hover{background:var(--hover)}
+  .cno{font-family:"Rubik",system-ui,sans-serif;font-weight:900;font-size:21px;line-height:1}
+  .chev{display:inline-block;color:var(--faint);font-size:12px;margin-inline-end:8px;transition:transform .2s,color .2s}
+  .crow.open .chev{transform:rotate(90deg);color:var(--teal)}
+  .crow.open{background:var(--hover)}
+  .crow.rk-red{background:var(--red-bg)} .crow.rk-amber{background:var(--amber-bg)}
+  .cpack{font-size:13px;color:#6E6757;margin-top:3px;font-weight:500}
+  .u{font-size:11px;color:var(--faint);font-weight:400;margin-inline-start:3px}
+  .sdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:7px;vertical-align:middle}
+  .sdot.red{background:var(--red);box-shadow:0 0 0 3px rgba(200,65,42,.16)}
+  .sdot.amber{background:var(--amber);box-shadow:0 0 0 3px rgba(208,138,30,.16)}
+  .exposed{color:var(--amber);font-weight:600}
+  .pricev{font-family:"Rubik",system-ui,sans-serif;font-weight:700;font-size:17px}
+  .pbar{width:90px;height:7px;border-radius:5px;background:var(--track);overflow:hidden;display:inline-block;vertical-align:middle;margin-inline-end:8px}
+  .pbar>span{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-soft))}
+  .stat-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 10px;border-radius:8px}
+  .stat-chip.red{background:var(--red-bg);color:var(--red-ink);font-weight:600}
+  .stat-chip.amber{background:var(--amber-bg);color:var(--amber-ink);font-weight:600}
+  .stat-chip.ok{background:var(--line-2);color:var(--muted)}
+
+  .detail-cell{padding:0 16px 18px !important;background:#FBF8F0}
+  table.sub{width:100%;border-collapse:collapse;margin-top:6px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:520px}
+  table.sub th{font-size:11.5px;font-weight:600;color:var(--muted);text-align:right;padding:10px 12px;background:#F4EFE3;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.sub th.n{text-align:left}
+  table.sub td{padding:9px 12px;font-size:13.5px;border-bottom:1px solid var(--line-2);font-feature-settings:"tnum";white-space:nowrap}
+  table.sub td.n{text-align:left;font-weight:500}
+  table.sub td.exp{color:var(--amber);font-weight:600}
+  table.sub td.dl.red{color:var(--red-ink);font-weight:700} table.sub td.dl.amber{color:var(--amber-ink);font-weight:700}
+  table.sub tbody tr:last-child td{border-bottom:none}
+  table.sub tr.risk-red{background:var(--red-bg)} table.sub tr.risk-amber{background:var(--amber-bg)}
+  .mrow{cursor:pointer}
+  .chev2{display:inline-block;color:var(--faint);font-size:10px;margin-inline-end:7px;transition:transform .2s,color .2s}
+  .mrow.open .chev2{transform:rotate(90deg);color:var(--teal)}
+  .mdetail-cell{padding:6px 12px 12px !important;background:#fff}
+  table.sub2{width:100%;border-collapse:collapse;background:#FBF8F0;border:1px solid var(--line);border-radius:10px;overflow:hidden;min-width:440px}
+  table.sub2 th{font-size:11px;font-weight:600;color:var(--faint);text-align:right;padding:8px 11px;background:#F4EFE3;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.sub2 th.n{text-align:left}
+  table.sub2 td{padding:7px 11px;font-size:12.5px;border-bottom:1px solid var(--line-2);font-feature-settings:"tnum";white-space:nowrap}
+  table.sub2 td.n{text-align:left;font-weight:500}
+  table.sub2 td.exp{color:var(--amber);font-weight:600}
+  table.sub2 tbody tr:last-child td{border-bottom:none}
+
+  .notes{margin-top:26px;font-size:12.5px;color:var(--muted);line-height:1.8}
+  .notes b{color:var(--ink);font-weight:500}
+  .crow.past{background:#E6E9EF} .crow.past:hover{background:#E1E5EC}
+  .crow.past td{color:#949BA7} .crow.past .cno{color:#727A86}
+  tr.mrow.past{background:#EDEFF3} tr.mrow.past td{color:#969DA9}
+  .ilsv{color:#0E7C5A;font-weight:800} td.ilsv{color:#0E7C5A;font-weight:700}
+  .crow.past .ilsv,tr.mrow.past .ilsv{color:#5E8B7A}
+  @media(max-width:560px){h1{font-size:27px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="tag">דוח מנהל · החלטות תמחור וקנייה</div>
+      <h1>קוקפיט תמחור — סוכר</h1>
+      <div class="sub">ספק: <b>סוכרים (סי.אי.אס.טי) בע״מ</b> · חשבון <b>MIKI OZ ASAKIM</b></div>
+    </div>
+    <div class="asof">
+      <div>עודכן: <b id="genat">—</b></div>
+      <div>מקור: <span id="srcfile">דוח הספק</span></div>
+    </div>
+  </header>
+
+  <div id="alertbar"></div>
+
+  <div class="strip" id="strip"></div>
+
+  <h2>ריכוז לפי סוג אריזה</h2>
+  <div class="sectsub">תמונת מצב לכל סוג אריזה — סך ההתחייבות, מה שטרם סופק, המחיר הממוצע, ומה שטרם תומחר.</div>
+  <div class="panel" style="margin-bottom:30px"><div class="scroll">
+    <table>
+      <thead><tr>
+        <th>סוג אריזה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">מחיר ממוצע</th><th class="n">טרם נסגר</th>
+      </tr></thead>
+      <tbody id="packrows"></tbody>
+    </table>
+  </div></div>
+
+  <h2>סולם תמחור לפי דדליין</h2>
+  <div class="sectsub">כמה טון עדיין לא תומחרו, מקובץ לפי חודש הבורסה והדדליין לסגירה (15 בחודש שלפני חודש הבורסה). זהו תור ההחלטות — ממוין מהדחוף לרחוק.</div>
+  <div class="ladder" id="ladder"></div>
+
+  <h2>כרטיס תמחור לפי חוזה</h2>
+  <div class="sectsub">לחצו על חוזה לריכוז חודשי · לחצו על חודש לפירוט המנות (המחירים שמהם מורכב הממוצע).</div>
+  <div class="panel"><div class="scroll">
+    <table>
+      <thead><tr>
+        <th>חוזה</th><th class="n">סך כמות</th><th class="n">כמות שסופקה</th><th class="n">נמשך (SAP)</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th><th class="n">סטטוס</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div></div>
+
+  <div class="notes">
+    <p><b>מחיר פתוח</b> = כמות שטרם תומחרה מול הבורסה — חשופה לתנודות מחיר. <b>סטטוס</b>: <b style="color:#BE7714">כתום</b> דדליין תוך 30 יום, <b style="color:#C8412A">אדום</b> תוך 15 יום או שעבר. כדאי לסגור מחיר לפחות 7 ימים לפני.</p>
+    <p><b>נמשך (SAP)</b> = הכמות שנמשכה בפועל מול הסכם המסגרת ב-SAP — הנתון שלכם, מתעדכן יומית ככל שמקשרים קבלות לחוזה. הפער מול "כמות שסופקה" (דיווח הספק) הוא דגל להתאמה, ומצטמצם ככל שהקישור הופך לשגרה.</p>
+    <p><b>סה״כ מחיר = בורסה + פרמיה</b> (USD). העמודות תואמות לדוח הספק. מחיר/בורסה ברמת חוזה וחודש הם ממוצע משוקלל לפי כמות מתומחרת. מקור: דוח הספק MIKI OZ · 11.5.2026. החישוב חי מול תאריך היום.</p>
+  </div>
+
+</div>
+
+<script>
+const NF=new Intl.NumberFormat('he-IL',{maximumFractionDigits:1});
+const f=n=>NF.format(n);
+const EX_MONTHS=[3,5,8,10,12];
+const HMON={3:'מרץ',5:'מאי',8:'אוגוסט',10:'אוקטובר',12:'דצמבר'};
+
+let contracts=[];
+let months={};
+
+function exOf(mstr){const [mm,yy]=mstr.split('/').map(Number);let ex=EX_MONTHS.find(v=>v>=mm),exY=yy;if(ex===undefined){ex=EX_MONTHS[0];exY=yy+1;}return {ex,exY};}
+function deadlineOf(ex,exY){let dm=ex-1,dy=exY;if(dm===0){dm=12;dy=exY-1;}return new Date(dy,dm-1,15);}
+function lotDeadline(x){const {ex,exY}=exOf(x.m);return deadlineOf(ex,exY);}
+function daysTo(d){return Math.round((d-new Date().setHours(0,0,0,0))/864e5);}
+function statusFromDays(days){if(days<=15)return 'red';if(days<=30)return 'amber';return null;}
+function lotStatus(x){if(!(x.unpriced>0))return null;return statusFromDays(daysTo(lotDeadline(x)));}
+function contractStatus(no){let s=null;(months[no]||[]).forEach(x=>{const r=lotStatus(x);if(r==='red')s='red';else if(r==='amber'&&s!=='red')s='amber';});return s;}
+function fmtDate(d){return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();}
+
+function render(){
+/* ===== ladder: aggregate unpriced across contracts by futures month ===== */
+const lmap={};
+contracts.forEach(c=>(months[c.no]||[]).forEach(x=>{
+  if(!(x.unpriced>0))return;
+  const {ex,exY}=exOf(x.m); const key=exY*100+ex;
+  if(!lmap[key]) lmap[key]={ex,exY,deadline:deadlineOf(ex,exY),tons:0,byp:{}};
+  lmap[key].tons+=x.unpriced;
+  lmap[key].byp[c.pack]=(lmap[key].byp[c.pack]||0)+x.unpriced;
+}));
+const ladder=Object.values(lmap).sort((a,b)=>a.deadline-b.deadline);
+document.getElementById('ladder').innerHTML = ladder.map(L=>{
+  const days=daysTo(L.deadline); const st=statusFromDays(days);
+  const daysTxt = days<0 ? 'דדליין עבר' : days+' ימים לדדליין';
+  const bd=Object.entries(L.byp).map(([p,t])=>p+': '+f(t)).join(' · ');
+  return `<div class="lcard ${st||''}">
+    <div class="fm">${HMON[L.ex]} ${L.exY}</div>
+    <div class="dl">דדליין תמחור: ${fmtDate(L.deadline)}</div>
+    <div class="big">${f(L.tons)}<u>טון</u></div>
+    <div class="days">${daysTxt}</div>
+    <div class="bd">${bd}</div>
+  </div>`;
+}).join('');
+
+/* ===== strip (portfolio position) ===== */
+const tC=contracts.reduce((s,c)=>s+c.committed,0);
+const tP=contracts.reduce((s,c)=>s+c.priced,0);
+const tU=contracts.reduce((s,c)=>s+c.unpriced,0);
+const wAvg=Math.round(contracts.reduce((s,c)=>s+(c.price?c.price*c.priced:0),0)/tP);
+const urgent=ladder.filter(L=>daysTo(L.deadline)<=15).reduce((s,L)=>s+L.tons,0);
+document.getElementById('strip').innerHTML=`
+  <div class="stat"><div class="l">סך התחייבות</div><div class="v">${f(tC)}<u>טון</u></div></div>
+  <div class="div"></div>
+  <div class="stat"><div class="l">מתומחר</div><div class="v">${Math.round(tP/tC*100)}%<u>· ${f(tP)} טון</u></div></div>
+  <div class="div"></div>
+  <div class="stat"><div class="l">חשיפה לא־מתומחרת</div><div class="v warn">${f(tU)}<u>טון</u></div></div>
+  <div class="div"></div>
+  <div class="stat"><div class="l">דחוף (עבר/תוך 15 יום)</div><div class="v" style="color:var(--red)">${f(urgent)}<u>טון</u></div></div>
+  <div class="div"></div>
+  <div class="stat"><div class="l">מחיר נעול ממוצע</div><div class="v">${f(wAvg)}<u>$</u></div></div>`;
+
+/* ===== summary by pack type ===== */
+const packs={};
+contracts.forEach(c=>{
+  const p = packs[c.pack] || (packs[c.pack]={committed:0,shipped:0,unpriced:0,ps:0,pq:0});
+  p.committed+=c.committed; p.shipped+=c.shipped; p.unpriced+=c.unpriced;
+  if(c.price){ p.ps+=c.price*c.priced; p.pq+=c.priced; }
+});
+const packOrder=['25 ק"ג','BB · שקי ענק','1 ק"ג'];
+const packKeys=Object.keys(packs).sort((a,b)=>(packOrder.indexOf(a)+1||99)-(packOrder.indexOf(b)+1||99));
+document.getElementById('packrows').innerHTML=packKeys.map(k=>{
+  const p=packs[k], open=p.committed-p.shipped, avg=p.pq?Math.round(p.ps/p.pq):null;
+  return `<tr>
+    <td><b>${k}</b></td>
+    <td class="n">${f(p.committed)}<span class="u">טון</span></td>
+    <td class="n">${f(open)}<span class="u">טון</span></td>
+    <td class="n">${avg!=null?f(avg)+'<span class="u">$</span>':'—'}</td>
+    <td class="n exposed">${f(p.unpriced)}<span class="u">טון</span></td>
+  </tr>`;
+}).join('');
+
+/* ===== per-contract drill-down ===== */
+function groupByMonth(no){const g=[],idx={};(months[no]||[]).forEach(x=>{if(!(x.m in idx)){idx[x.m]=g.length;g.push({m:x.m,lots:[]});}g[idx[x.m]].lots.push(x);});return g;}
+function aggMonth(grp){const a={m:grp.m,qty:0,shipped:0,priced:0,unpriced:0,ps:0,pq:0,iv:0,iq:0};grp.lots.forEach(x=>{a.qty+=x.qty;a.shipped+=x.shipped;a.priced+=x.priced;a.unpriced+=x.unpriced;if(x.price){a.ps+=x.price*x.priced;a.pq+=x.priced;}if(x.ils!=null){a.iv+=x.ils*(x.ils_qty||0);a.iq+=(x.ils_qty||0);}});a.price=a.pq?a.ps/a.pq:null;a.ils=a.iq?Math.round(a.iv/a.iq):null;return a;}
+function monthsTable(no){
+  const prem=(contracts.find(c=>c.no===no)||{}).prem;
+  const groups=groupByMonth(no);
+  if(!groups.length)return '<div style="padding:14px;color:var(--muted)">אין פירוט.</div>';
+  let html='<table class="sub"><thead><tr><th>חודש אספקה</th><th class="n">סך כמות</th><th class="n">כמות שסופקה</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th><th class="n">דדליין תמחור</th></tr></thead><tbody>';
+  groups.forEach(grp=>{
+    const a=aggMonth(grp); const st=lotStatus({m:a.m,unpriced:a.unpriced});
+    const dlTxt=a.unpriced>0?fmtDate(lotDeadline({m:a.m})):'—';
+    const board=a.price!=null?a.price-prem:null;
+    html+=`<tr class="mrow${st?' risk-'+st:''}${a.shipped>=a.qty&&a.qty>0?' past':''}"><td><span class="chev2">▸</span>${a.m}</td><td class="n">${f(a.qty)}</td><td class="n">${f(a.shipped)}</td><td class="n">${f(a.priced)}</td><td class="n exp">${f(a.unpriced)}</td><td class="n">${prem}</td><td class="n">${board!=null?f(Math.round(board)):'—'}</td><td class="n">${a.price!=null?f(Math.round(a.price))+' $':'—'}</td><td class="n ilsv">${a.ils!=null?f(a.ils)+' ₪':'—'}</td><td class="n dl ${st||''}">${dlTxt}</td></tr>`;
+    const lots=grp.lots.map((x,j)=>{const lb=x.price!=null?x.price-prem:null;return `<tr><td>מנה ${j+1}</td><td class="n">${f(x.qty)}</td><td class="n">${f(x.shipped)}</td><td class="n">${f(x.priced)}</td><td class="n exp">${f(x.unpriced)}</td><td class="n">${x.prem!=null?x.prem:'—'}</td><td class="n">${lb!=null?f(lb):'—'}</td><td class="n">${x.price!=null?f(x.price)+' $':'—'}</td><td class="n ilsv">${x.ils!=null?f(x.ils)+' ₪':'—'}</td></tr>`;}).join('');
+    html+=`<tr class="mdetail" hidden><td colspan="10" class="mdetail-cell"><table class="sub2"><thead><tr><th>מנה</th><th class="n">סך כמות</th><th class="n">כמות שסופקה</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th></tr></thead><tbody>${lots}</tbody></table></td></tr>`;
+  });
+  return html+'</tbody></table>';
+}
+document.getElementById('rows').innerHTML=contracts.map(c=>{
+  const st=contractStatus(c.no);
+  const chip = st==='red'?'<span class="stat-chip red">דחוף</span>':st==='amber'?'<span class="stat-chip amber">מתקרב</span>':'<span class="stat-chip ok">תקין</span>';
+  const board = c.price!=null ? c.price - c.prem : null;
+  return `<tr class="crow ${st?'rk-'+st:''} ${c.shipped>=c.committed&&c.committed>0?'past':''}" data-c="${c.no}">
+    <td><div class="cno"><span class="chev">▸</span><span class="sdot ${st||''}"></span>${c.no}</div><div class="cpack">${c.pack}</div></td>
+    <td class="n">${f(c.committed)}<span class="u">טון</span></td>
+    <td class="n">${f(c.shipped)}<span class="u">טון</span></td>
+    <td class="n">${c.drawn_sap!=null?f(c.drawn_sap)+'<span class="u">טון</span>':'<span style="color:var(--faint)">—</span>'}</td>
+    <td class="n">${f(c.priced)}<span class="u">טון</span></td>
+    <td class="n exposed">${f(c.unpriced)}<span class="u">טון</span></td>
+    <td class="n">${c.prem}<span class="u">$</span></td>
+    <td class="n">${board!=null?f(board)+'<span class="u">$</span>':'—'}</td>
+    <td class="n"><span class="pricev">${c.price!=null?f(c.price):'—'}</span>${c.price!=null?'<span class="u">$</span>':''}</td>
+    <td class="n"><span class="ilsv">${c.ils!=null?f(c.ils):'—'}</span>${c.ils!=null?'<span class="u">₪</span>':''}</td>
+    <td class="n">${chip}</td>
+  </tr>
+  <tr class="detail" data-d="${c.no}" hidden><td colspan="11" class="detail-cell">${monthsTable(c.no)}</td></tr>`;
+}).join('');
+
+/* alert banner */
+(function(){
+  const reds=contracts.filter(c=>contractStatus(c.no)==='red').map(c=>c.no);
+  const ambers=contracts.filter(c=>contractStatus(c.no)==='amber').map(c=>c.no);
+  if(!reds.length&&!ambers.length)return;
+  const parts=[];
+  if(reds.length)parts.push('<b>'+reds.length+' חוזים</b> דורשים פעולה — דדליין עבר או תוך 15 יום ('+reds.join(', ')+')');
+  if(ambers.length)parts.push('<b>'+ambers.length+'</b> מתקרבים — תוך 30 יום ('+ambers.join(', ')+')');
+  document.getElementById('alertbar').innerHTML='<div class="alertbar '+(reds.length?'red':'amber')+'"><span class="abdot"></span><div>התראת תמחור: '+parts.join(' · ')+'</div></div>';
+})();
+} /* end render */
+
+/* ===== load data from external JSON (refreshed by the scheduled generator) ===== */
+fetch('manager_data.json',{cache:'no-store'})
+  .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
+  .then(d=>{
+    contracts = d.contracts || [];
+    months    = d.months || {};
+    const g=document.getElementById('genat'); if(g&&d.generated_at) g.textContent=d.generated_at;
+    const s=document.getElementById('srcfile'); if(s&&d.supplier_file) s.textContent=d.supplier_file;
+    render();
+  })
+  .catch(()=>{
+    document.getElementById('alertbar').innerHTML='<div class="alertbar amber"><span class="abdot"></span><div>לא ניתן לטעון את <b>manager_data.json</b>. בתצוגה מקומית פתחו דרך שרת (או GitHub Pages); הקובץ צריך להיות לצד הדף.</div></div>';
+  });
+
+/* two-level toggle */
+document.getElementById('rows').addEventListener('click',e=>{
+  const mrow=e.target.closest('.mrow');
+  if(mrow){const md=mrow.nextElementSibling;if(md&&md.classList.contains('mdetail')){if(md.hasAttribute('hidden')){md.removeAttribute('hidden');mrow.classList.add('open');}else{md.setAttribute('hidden','');mrow.classList.remove('open');}}return;}
+  const row=e.target.closest('.crow');if(!row)return;
+  const det=document.querySelector('.detail[data-d="'+row.dataset.c+'"]');if(!det)return;
+  if(det.hasAttribute('hidden')){det.removeAttribute('hidden');row.classList.add('open');}else{det.setAttribute('hidden','');row.classList.remove('open');}
+});
+</script>
+</body>
+</html>
