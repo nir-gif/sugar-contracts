@@ -156,7 +156,7 @@
   <div class="panel"><div class="scroll">
     <table>
       <thead><tr>
-        <th>חוזה</th><th class="n">סך כמות</th><th class="n">כמות שסופקה</th><th class="n">נמשך (SAP)</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th><th class="n">סטטוס</th>
+        <th>חוזה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">נמשך (SAP)</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th><th class="n">סטטוס</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -167,7 +167,7 @@
 
   <div class="notes">
     <p><b>מחיר פתוח</b> = כמות שטרם תומחרה מול הבורסה — חשופה לתנודות מחיר. <b>סטטוס</b>: <b style="color:#BE7714">כתום</b> דדליין תוך 30 יום, <b style="color:#C8412A">אדום</b> תוך 15 יום או שעבר. כדאי לסגור מחיר לפחות 7 ימים לפני.</p>
-    <p><b>נמשך (SAP)</b> = הכמות שנמשכה בפועל מול הסכם המסגרת ב-SAP — הנתון שלכם, מתעדכן יומית ככל שמקשרים קבלות לחוזה. הפער מול "כמות שסופקה" (דיווח הספק) הוא דגל להתאמה, ומצטמצם ככל שהקישור הופך לשגרה.</p>
+    <p><b>נמשך (SAP)</b> = הכמות שנמשכה בפועל מול הסכם המסגרת ב-SAP — הנתון שלכם, מתעדכן יומית ככל שמקשרים קבלות לחוזה. הפער בינו לבין מה שהספק דיווח שסופק בפועל הוא דגל להתאמה, ומצטמצם ככל שהקישור הופך לשגרה.</p>
     <p><b>סה״כ מחיר = בורסה + פרמיה</b> (USD). העמודות תואמות לדוח הספק. מחיר/בורסה ברמת חוזה וחודש הם ממוצע משוקלל לפי כמות מתומחרת. מקור: דוח הספק MIKI OZ · 11.5.2026. החישוב חי מול תאריך היום.</p>
   </div>
 
@@ -262,14 +262,14 @@ function monthsTable(no){
   const prem=(contracts.find(c=>c.no===no)||{}).prem;
   const groups=groupByMonth(no);
   if(!groups.length)return '<div style="padding:14px;color:var(--muted)">אין פירוט.</div>';
-  let html='<table class="sub"><thead><tr><th>חודש אספקה</th><th class="n">סך כמות</th><th class="n">כמות שסופקה</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th><th class="n">דדליין תמחור</th></tr></thead><tbody>';
+  let html='<table class="sub"><thead><tr><th>חודש אספקה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th><th class="n">דדליין תמחור</th></tr></thead><tbody>';
   groups.forEach(grp=>{
     const a=aggMonth(grp); const st=lotStatus({m:a.m,unpriced:a.unpriced});
     const dlTxt=a.unpriced>0?fmtDate(lotDeadline({m:a.m})):'—';
     const board=a.price!=null?a.price-prem:null;
-    html+=`<tr class="mrow${st?' risk-'+st:''}${a.shipped>=a.qty&&a.qty>0?' past':''}"><td><span class="chev2">▸</span>${a.m}</td><td class="n">${f(a.qty)}</td><td class="n">${f(a.shipped)}</td><td class="n">${f(a.priced)}</td><td class="n exp">${f(a.unpriced)}</td><td class="n">${prem}</td><td class="n">${board!=null?f(Math.round(board)):'—'}</td><td class="n">${a.price!=null?f(Math.round(a.price))+' $':'—'}</td><td class="n ilsv">${a.ils!=null?f(a.ils)+' ₪':'—'}</td><td class="n dl ${st||''}">${dlTxt}</td></tr>`;
-    const lots=grp.lots.map((x,j)=>{const lb=x.price!=null?x.price-prem:null;return `<tr><td>מנה ${j+1}</td><td class="n">${f(x.qty)}</td><td class="n">${f(x.shipped)}</td><td class="n">${f(x.priced)}</td><td class="n exp">${f(x.unpriced)}</td><td class="n">${x.prem!=null?x.prem:'—'}</td><td class="n">${lb!=null?f(lb):'—'}</td><td class="n">${x.price!=null?f(x.price)+' $':'—'}</td><td class="n ilsv">${x.ils!=null?f(x.ils)+' ₪':'—'}</td></tr>`;}).join('');
-    html+=`<tr class="mdetail" hidden><td colspan="10" class="mdetail-cell"><table class="sub2"><thead><tr><th>מנה</th><th class="n">סך כמות</th><th class="n">כמות שסופקה</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th></tr></thead><tbody>${lots}</tbody></table></td></tr>`;
+    html+=`<tr class="mrow${st?' risk-'+st:''}${a.shipped>=a.qty&&a.qty>0?' past':''}"><td><span class="chev2">▸</span>${a.m}</td><td class="n">${f(a.qty)}</td><td class="n">${f(a.qty-a.shipped)}</td><td class="n">${f(a.priced)}</td><td class="n exp">${f(a.unpriced)}</td><td class="n">${prem}</td><td class="n">${board!=null?f(Math.round(board)):'—'}</td><td class="n">${a.price!=null?f(Math.round(a.price))+' $':'—'}</td><td class="n ilsv">${a.ils!=null?f(a.ils)+' ₪':'—'}</td><td class="n dl ${st||''}">${dlTxt}</td></tr>`;
+    const lots=grp.lots.map((x,j)=>{const lb=x.price!=null?x.price-prem:null;return `<tr><td>מנה ${j+1}</td><td class="n">${f(x.qty)}</td><td class="n">${f(x.qty-x.shipped)}</td><td class="n">${f(x.priced)}</td><td class="n exp">${f(x.unpriced)}</td><td class="n">${x.prem!=null?x.prem:'—'}</td><td class="n">${lb!=null?f(lb):'—'}</td><td class="n">${x.price!=null?f(x.price)+' $':'—'}</td><td class="n ilsv">${x.ils!=null?f(x.ils)+' ₪':'—'}</td></tr>`;}).join('');
+    html+=`<tr class="mdetail" hidden><td colspan="10" class="mdetail-cell"><table class="sub2"><thead><tr><th>מנה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th></tr></thead><tbody>${lots}</tbody></table></td></tr>`;
   });
   return html+'</tbody></table>';
 }
@@ -280,7 +280,7 @@ document.getElementById('rows').innerHTML=contracts.map(c=>{
   return `<tr class="crow ${st?'rk-'+st:''} ${c.shipped>=c.committed&&c.committed>0?'past':''}" data-c="${c.no}">
     <td><div class="cno"><span class="chev">▸</span><span class="sdot ${st||''}"></span>${c.no}</div><div class="cpack">${c.pack}</div></td>
     <td class="n">${f(c.committed)}<span class="u">טון</span></td>
-    <td class="n">${f(c.shipped)}<span class="u">טון</span></td>
+    <td class="n">${f(c.committed-c.shipped)}<span class="u">טון</span></td>
     <td class="n">${c.drawn_sap!=null?f(c.drawn_sap)+'<span class="u">טון</span>':'<span style="color:var(--faint)">—</span>'}</td>
     <td class="n">${f(c.priced)}<span class="u">טון</span></td>
     <td class="n exposed">${f(c.unpriced)}<span class="u">טון</span></td>
