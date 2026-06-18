@@ -156,7 +156,7 @@
   <div class="panel"><div class="scroll">
     <table>
       <thead><tr>
-        <th>חוזה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">נמשך (SAP)</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th><th class="n">סטטוס</th>
+        <th>חוזה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th><th class="n">סטטוס</th>
       </tr></thead>
       <tbody id="rows"></tbody>
     </table>
@@ -167,7 +167,6 @@
 
   <div class="notes">
     <p><b>מחיר פתוח</b> = כמות שטרם תומחרה מול הבורסה — חשופה לתנודות מחיר. <b>סטטוס</b>: <b style="color:#BE7714">כתום</b> דדליין תוך 30 יום, <b style="color:#C8412A">אדום</b> תוך 15 יום או שעבר. כדאי לסגור מחיר לפחות 7 ימים לפני.</p>
-    <p><b>נמשך (SAP)</b> = הכמות שנמשכה בפועל מול הסכם המסגרת ב-SAP — הנתון שלכם, מתעדכן יומית ככל שמקשרים קבלות לחוזה. הפער בינו לבין מה שהספק דיווח שסופק בפועל הוא דגל להתאמה, ומצטמצם ככל שהקישור הופך לשגרה.</p>
     <p><b>סה״כ מחיר = בורסה + פרמיה</b> (USD). העמודות תואמות לדוח הספק. מחיר/בורסה ברמת חוזה וחודש הם ממוצע משוקלל לפי כמות מתומחרת. מקור: דוח הספק MIKI OZ · 11.5.2026. החישוב חי מול תאריך היום.</p>
   </div>
 
@@ -281,7 +280,6 @@ document.getElementById('rows').innerHTML=contracts.map(c=>{
     <td><div class="cno"><span class="chev">▸</span><span class="sdot ${st||''}"></span>${c.no}</div><div class="cpack">${c.pack}</div></td>
     <td class="n">${f(c.committed)}<span class="u">טון</span></td>
     <td class="n">${f(c.committed-c.shipped)}<span class="u">טון</span></td>
-    <td class="n">${c.drawn_sap!=null?f(c.drawn_sap)+'<span class="u">טון</span>':'<span style="color:var(--faint)">—</span>'}</td>
     <td class="n">${f(c.priced)}<span class="u">טון</span></td>
     <td class="n exposed">${f(c.unpriced)}<span class="u">טון</span></td>
     <td class="n">${c.prem}<span class="u">$</span></td>
@@ -290,7 +288,7 @@ document.getElementById('rows').innerHTML=contracts.map(c=>{
     <td class="n"><span class="ilsv">${c.ils!=null?f(c.ils):'—'}</span>${c.ils!=null?'<span class="u">₪</span>':''}${(function(){const lp=packLast[c.pack];return lp!=null?'<div class="subils">אחרונה: '+f(lp)+' ₪</div>':'';})()}</td>
     <td class="n">${chip}</td>
   </tr>
-  <tr class="detail" data-d="${c.no}" hidden><td colspan="11" class="detail-cell">${monthsTable(c.no)}</td></tr>`;
+  <tr class="detail" data-d="${c.no}" hidden><td colspan="10" class="detail-cell">${monthsTable(c.no)}</td></tr>`;
 }).join('');
 
 /* alert banner */
