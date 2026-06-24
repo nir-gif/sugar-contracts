@@ -203,6 +203,10 @@ contracts.forEach(c=>(months[c.no]||[]).forEach(x=>{
 }));
 const ladder=Object.values(lmap).sort((a,b)=>a.deadline-b.deadline);
 
+/* ===== open quantity: real-time from SAP (PlanQty − CumQty), fallback to Excel ===== */
+const openQty = c => (c.open_sap!=null ? c.open_sap : (c.committed - c.shipped));
+const isPast  = c => c.committed>0 && openQty(c) <= 0.05;
+
 /* ===== strip (portfolio position) ===== */
 const tC=contracts.reduce((s,c)=>s+c.committed,0);
 const tP=contracts.reduce((s,c)=>s+c.priced,0);
@@ -223,8 +227,8 @@ document.getElementById('strip').innerHTML=`
 /* ===== summary by pack type ===== */
 const packs={};
 contracts.forEach(c=>{
-  const p = packs[c.pack] || (packs[c.pack]={committed:0,shipped:0,unpriced:0,ps:0,pq:0});
-  p.committed+=c.committed; p.shipped+=c.shipped; p.unpriced+=c.unpriced;
+  const p = packs[c.pack] || (packs[c.pack]={committed:0,shipped:0,open:0,unpriced:0,ps:0,pq:0});
+  p.committed+=c.committed; p.shipped+=c.shipped; p.open+=openQty(c); p.unpriced+=c.unpriced;
   if(c.price){ p.ps+=c.price*c.priced; p.pq+=c.priced; }
 });
 const packOrder=['25 ק"ג','BB · שקי ענק','1 ק"ג'];
@@ -235,14 +239,14 @@ function packContractsTable(pack){
   cs.forEach(c=>{
     const st=contractStatus(c.no);
     const chip = st==='red'?'<span class="stat-chip red">דחוף</span>':st==='amber'?'<span class="stat-chip amber">מתקרב</span>':'<span class="stat-chip ok">תקין</span>';
-    const past=c.shipped>=c.committed&&c.committed>0?' past':'';
-    const openShip=c.committed-c.shipped, lp=packLast[c.pack];
+    const past=isPast(c)?' past':'';
+    const openShip=openQty(c), lp=packLast[c.pack];
     h+=`<tr class="${past.trim()}"><td><b>${c.no}</b></td><td class="n">${f(c.committed)}</td><td class="n">${f(openShip)}</td><td class="n exp">${f(c.unpriced)}</td><td class="n">${c.price!=null?f(c.price)+' $':'—'}</td><td class="n ilsv">${c.ils!=null?f(c.ils)+' ₪':'—'}</td><td class="n ilsv">${lp!=null?f(lp)+' ₪':'—'}</td><td class="n">${chip}</td></tr>`;
   });
   return h+'</tbody></table>';
 }
 document.getElementById('packrows').innerHTML=packKeys.map(k=>{
-  const p=packs[k], open=p.committed-p.shipped, avg=p.pq?Math.round(p.ps/p.pq):null, lp=packLast[k];
+  const p=packs[k], open=p.open, avg=p.pq?Math.round(p.ps/p.pq):null, lp=packLast[k];
   return `<tr class="prow" data-p="${k}">
     <td><span class="chev">▸</span> <b>${k}</b></td>
     <td class="n">${f(p.committed)}<span class="u">טון</span></td>
@@ -276,10 +280,10 @@ document.getElementById('rows').innerHTML=contracts.map(c=>{
   const st=contractStatus(c.no);
   const chip = st==='red'?'<span class="stat-chip red">דחוף</span>':st==='amber'?'<span class="stat-chip amber">מתקרב</span>':'<span class="stat-chip ok">תקין</span>';
   const board = c.price!=null ? c.price - c.prem : null;
-  return `<tr class="crow ${st?'rk-'+st:''} ${c.shipped>=c.committed&&c.committed>0?'past':''}" data-c="${c.no}">
+  return `<tr class="crow ${st?'rk-'+st:''} ${isPast(c)?'past':''}" data-c="${c.no}">
     <td><div class="cno"><span class="chev">▸</span><span class="sdot ${st||''}"></span>${c.no}</div><div class="cpack">${c.pack}</div></td>
     <td class="n">${f(c.committed)}<span class="u">טון</span></td>
-    <td class="n">${f(c.committed-c.shipped)}<span class="u">טון</span></td>
+    <td class="n">${f(openQty(c))}<span class="u">טון</span></td>
     <td class="n">${f(c.priced)}<span class="u">טון</span></td>
     <td class="n exposed">${f(c.unpriced)}<span class="u">טון</span></td>
     <td class="n">${c.prem}<span class="u">$</span></td>
