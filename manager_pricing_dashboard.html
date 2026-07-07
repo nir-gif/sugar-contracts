@@ -192,6 +192,17 @@ function contractStatus(no){let s=null;(months[no]||[]).forEach(x=>{const r=lotS
 function fmtDate(d){return ('0'+d.getDate()).slice(-2)+'/'+('0'+(d.getMonth()+1)).slice(-2)+'/'+d.getFullYear();}
 
 function render(){
+/* ===== reconcile monthly/lot "טרם סופק" to the SAP contract-level open (FIFO: earliest months absorb deliveries first) ===== */
+const _mk=m=>{const [mm,yy]=m.split('/').map(Number);return yy*100+mm;};
+contracts.forEach(c=>{
+  const lots=months[c.no]||[];
+  lots.forEach(x=>{x.openAdj=Math.max(0,(x.qty||0)-(x.shipped||0));});
+  if(c.open_sap==null)return;                 // no SAP -> keep Excel open
+  let diff=+(lots.reduce((s,x)=>s+x.openAdj,0)-c.open_sap).toFixed(3);
+  if(diff>0){[...lots].sort((a,b)=>_mk(a.m)-_mk(b.m)).forEach(x=>{if(diff<=0)return;const cut=Math.min(x.openAdj,diff);x.openAdj=+(x.openAdj-cut).toFixed(3);diff=+(diff-cut).toFixed(3);});}
+  else if(diff<0){const s=[...lots].sort((a,b)=>_mk(a.m)-_mk(b.m));if(s.length)s[s.length-1].openAdj=+(s[s.length-1].openAdj-diff).toFixed(3);}
+});
+
 /* ===== ladder: aggregate unpriced across contracts by futures month ===== */
 const lmap={};
 contracts.forEach(c=>(months[c.no]||[]).forEach(x=>{
@@ -260,7 +271,7 @@ document.getElementById('packrows').innerHTML=packKeys.map(k=>{
 
 /* ===== per-contract drill-down ===== */
 function groupByMonth(no){const g=[],idx={};(months[no]||[]).forEach(x=>{if(!(x.m in idx)){idx[x.m]=g.length;g.push({m:x.m,lots:[]});}g[idx[x.m]].lots.push(x);});return g;}
-function aggMonth(grp){const a={m:grp.m,qty:0,shipped:0,priced:0,unpriced:0,ps:0,pq:0,iv:0,iq:0};grp.lots.forEach(x=>{a.qty+=x.qty;a.shipped+=x.shipped;a.priced+=x.priced;a.unpriced+=x.unpriced;if(x.price){a.ps+=x.price*x.priced;a.pq+=x.priced;}if(x.ils!=null){a.iv+=x.ils*(x.ils_qty||0);a.iq+=(x.ils_qty||0);}});a.price=a.pq?a.ps/a.pq:null;a.ils=a.iq?Math.round(a.iv/a.iq):null;return a;}
+function aggMonth(grp){const a={m:grp.m,qty:0,shipped:0,openAdj:0,priced:0,unpriced:0,ps:0,pq:0,iv:0,iq:0};grp.lots.forEach(x=>{a.qty+=x.qty;a.shipped+=x.shipped;a.openAdj+=(x.openAdj||0);a.priced+=x.priced;a.unpriced+=x.unpriced;if(x.price){a.ps+=x.price*x.priced;a.pq+=x.priced;}if(x.ils!=null){a.iv+=x.ils*(x.ils_qty||0);a.iq+=(x.ils_qty||0);}});a.price=a.pq?a.ps/a.pq:null;a.ils=a.iq?Math.round(a.iv/a.iq):null;return a;}
 function monthsTable(no){
   const prem=(contracts.find(c=>c.no===no)||{}).prem;
   const groups=groupByMonth(no);
@@ -270,8 +281,8 @@ function monthsTable(no){
     const a=aggMonth(grp); const st=lotStatus({m:a.m,unpriced:a.unpriced});
     const dlTxt=a.unpriced>0?fmtDate(lotDeadline({m:a.m})):'—';
     const board=a.price!=null?a.price-prem:null;
-    html+=`<tr class="mrow${st?' risk-'+st:''}${a.shipped>=a.qty&&a.qty>0?' past':''}"><td><span class="chev2">▸</span>${a.m}</td><td class="n">${f(a.qty)}</td><td class="n">${f(a.qty-a.shipped)}</td><td class="n">${f(a.priced)}</td><td class="n exp">${f(a.unpriced)}</td><td class="n">${prem}</td><td class="n">${board!=null?f(Math.round(board)):'—'}</td><td class="n">${a.price!=null?f(Math.round(a.price))+' $':'—'}</td><td class="n ilsv">${a.ils!=null?f(a.ils)+' ₪':'—'}</td><td class="n dl ${st||''}">${dlTxt}</td></tr>`;
-    const lots=grp.lots.map((x,j)=>{const lb=x.price!=null?x.price-prem:null;return `<tr><td>מנה ${j+1}</td><td class="n">${f(x.qty)}</td><td class="n">${f(x.qty-x.shipped)}</td><td class="n">${f(x.priced)}</td><td class="n exp">${f(x.unpriced)}</td><td class="n">${x.prem!=null?x.prem:'—'}</td><td class="n">${lb!=null?f(lb):'—'}</td><td class="n">${x.price!=null?f(x.price)+' $':'—'}</td><td class="n ilsv">${x.ils!=null?f(x.ils)+' ₪':'—'}</td></tr>`;}).join('');
+    html+=`<tr class="mrow${st?' risk-'+st:''}${a.openAdj<=0.05&&a.qty>0?' past':''}"><td><span class="chev2">▸</span>${a.m}</td><td class="n">${f(a.qty)}</td><td class="n">${f(a.openAdj)}</td><td class="n">${f(a.priced)}</td><td class="n exp">${f(a.unpriced)}</td><td class="n">${prem}</td><td class="n">${board!=null?f(Math.round(board)):'—'}</td><td class="n">${a.price!=null?f(Math.round(a.price))+' $':'—'}</td><td class="n ilsv">${a.ils!=null?f(a.ils)+' ₪':'—'}</td><td class="n dl ${st||''}">${dlTxt}</td></tr>`;
+    const lots=grp.lots.map((x,j)=>{const lb=x.price!=null?x.price-prem:null;return `<tr><td>מנה ${j+1}</td><td class="n">${f(x.qty)}</td><td class="n">${f(x.openAdj)}</td><td class="n">${f(x.priced)}</td><td class="n exp">${f(x.unpriced)}</td><td class="n">${x.prem!=null?x.prem:'—'}</td><td class="n">${lb!=null?f(lb):'—'}</td><td class="n">${x.price!=null?f(x.price)+' $':'—'}</td><td class="n ilsv">${x.ils!=null?f(x.ils)+' ₪':'—'}</td></tr>`;}).join('');
     html+=`<tr class="mdetail" hidden><td colspan="10" class="mdetail-cell"><table class="sub2"><thead><tr><th>מנה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">מחיר סגור</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th></tr></thead><tbody>${lots}</tbody></table></td></tr>`;
   });
   return html+'</tbody></table>';
