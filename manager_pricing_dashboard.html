@@ -182,7 +182,7 @@ let contracts=[];
 let months={};
 let packLast={};
 
-function exOf(mstr){const [mm,yy]=mstr.split('/').map(Number);let ex=EX_MONTHS.find(v=>v>=mm),exY=yy;if(ex===undefined){ex=EX_MONTHS[0];exY=yy+1;}return {ex,exY};}
+function exOf(mstr){const [mm,yy]=mstr.split('/').map(Number);const c=EX_MONTHS.filter(v=>v<=mm);if(c.length)return {ex:c[c.length-1],exY:yy};return {ex:12,exY:yy-1};}
 function deadlineOf(ex,exY){let dm=ex-1,dy=exY;if(dm===0){dm=12;dy=exY-1;}return new Date(dy,dm-1,15);}
 function lotDeadline(x){const {ex,exY}=exOf(x.m);return deadlineOf(ex,exY);}
 function daysTo(d){return Math.round((d-new Date().setHours(0,0,0,0))/864e5);}
