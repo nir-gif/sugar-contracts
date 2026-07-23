@@ -74,6 +74,13 @@
   .crow.open .chev{transform:rotate(90deg);color:var(--teal)}
   tbody tr.prow{cursor:pointer;transition:background .15s}
   .prow.open .chev{transform:rotate(90deg);color:var(--teal)}
+  tbody tr.drow{cursor:pointer;transition:background .15s}
+  tbody tr.drow:hover{background:var(--hover)}
+  .drow.open{background:var(--hover)}
+  .drow.open .chev{transform:rotate(90deg);color:var(--teal)}
+  .crow2{cursor:pointer}
+  .crow2:hover{background:var(--hover)}
+  .crow2.open .chev2{transform:rotate(90deg);color:var(--teal)}
   .crow.open{background:var(--hover)}
   .crow.rk-red{background:var(--red-bg)} .crow.rk-amber{background:var(--amber-bg)}
   .cpack{font-size:13px;color:#6E6757;margin-top:3px;font-weight:500}
@@ -140,14 +147,12 @@
 
   <div id="alertbar"></div>
 
-  <h2>ריכוז לפי סוג אריזה</h2>
-  <div class="sectsub">תמונת מצב לכל סוג אריזה — סך ההתחייבות, מה שטרם סופק, המחיר הממוצע, ומה שטרם תומחר.</div>
+  <h2>משיכות חודשיות לפי סוג אריזה</h2>
+  <div class="sectsub">כמה נמשך בפועל בכל חודש — תעודות כניסה בניכוי החזרות, ישירות מ-SAP. לחצו על סוג אריזה לפילוח לפי חוזה · לחצו על חוזה לפירוט התעודות.</div>
   <div class="panel" style="margin-bottom:30px"><div class="scroll">
     <table>
-      <thead><tr>
-        <th>סוג אריזה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">מחיר ממוצע</th><th class="n">טרם נסגר</th><th class="n">מחיר רכישה אחרונה</th>
-      </tr></thead>
-      <tbody id="packrows"></tbody>
+      <thead><tr id="drawhead"></tr></thead>
+      <tbody id="drawrows"></tbody>
     </table>
   </div></div>
 
@@ -257,18 +262,57 @@ function packContractsTable(pack){
   });
   return h+'</tbody></table>';
 }
-document.getElementById('packrows').innerHTML=packKeys.map(k=>{
-  const p=packs[k], open=p.open, avg=p.pq?Math.round(p.ps/p.pq):null, lp=packLast[k];
-  return `<tr class="prow" data-p="${k}">
-    <td><span class="chev">▸</span> <b>${k}</b></td>
-    <td class="n">${f(p.committed)}<span class="u">טון</span></td>
-    <td class="n">${f(open)}<span class="u">טון</span></td>
-    <td class="n">${avg!=null?f(avg)+'<span class="u">$</span>':'—'}</td>
-    <td class="n exposed">${f(p.unpriced)}<span class="u">טון</span></td>
-    <td class="n ilsv">${lp!=null?f(lp)+'<span class="u">₪</span>':'—'}</td>
-  </tr>
-  <tr class="pdetail" data-pd="${k}" hidden><td colspan="6" class="detail-cell">${packContractsTable(k)}</td></tr>`;
-}).join('');
+/* ===== monthly draws by pack (from SAP: goods receipts net of returns) ===== */
+const MN_SHORT=['','ינו','פבר','מרץ','אפר','מאי','יונ','יול','אוג','ספט','אוק','נוב','דצמ'];
+const ymLabel=ym=>{const [y,m]=ym.split('-').map(Number);return MN_SHORT[m]+" '"+String(y).slice(-2);};
+const dz=n=>n?f(n):'<span style="color:var(--faint)">—</span>';
+const draws=data.draws||null;
+
+function drawDocs(pack,con){
+  const p=draws.packs[pack];
+  let rows=[];
+  draws.months.forEach(m=>{(p.docs[con+'|'+m]||[]).forEach(x=>rows.push(x));});
+  if(!rows.length)return '<div style="padding:12px;color:var(--muted)">אין תעודות.</div>';
+  let h='<table class="sub2"><thead><tr><th>תעודה</th><th>תאריך</th><th>פריט</th><th class="n">כמות</th><th>סוג</th></tr></thead><tbody>';
+  rows.forEach(x=>{
+    const neg=x.qty<0;
+    h+=`<tr><td>${x.doc!=null?x.doc:'—'}</td><td>${x.d.split('-').reverse().join('/')}</td><td>${x.sku}</td>`
+      +`<td class="n"${neg?' style="color:var(--red)"':''}>${f(x.qty)}</td>`
+      +`<td>${x.typ==='C'?'<span style="color:var(--red)">החזרה</span>':'כניסה'}</td></tr>`;
+  });
+  return h+'</tbody></table>';
+}
+function drawContracts(pack){
+  const p=draws.packs[pack], dm=draws.months;
+  const cons=Object.keys(p.contracts).sort((a,b)=>a===''?1:b===''?-1:a.localeCompare(b));
+  if(!cons.length)return '<div style="padding:14px;color:var(--muted)">אין משיכות בתקופה.</div>';
+  let h='<table class="sub"><thead><tr><th>חוזה</th>'+dm.map(m=>`<th class="n">${ymLabel(m)}</th>`).join('')+'<th class="n">סה״כ</th></tr></thead><tbody>';
+  cons.forEach(c=>{
+    const row=p.contracts[c], tot=dm.reduce((s,m)=>s+(row[m]||0),0);
+    const label=c===''?'<span style="color:var(--muted)">ללא שיוך</span>':'<b>'+c+'</b>';
+    h+=`<tr class="crow2" data-dc="${pack}"><td><span class="chev2">▸</span>${label}</td>`
+      +dm.map(m=>`<td class="n">${dz(row[m]||0)}</td>`).join('')
+      +`<td class="n"><b>${f(tot)}</b></td></tr>`
+      +`<tr class="cdetail2" hidden><td colspan="${dm.length+2}" class="mdetail-cell">${drawDocs(pack,c)}</td></tr>`;
+  });
+  return h+'</tbody></table>';
+}
+if(draws&&draws.months&&draws.months.length&&Object.keys(draws.packs||{}).length){
+  const dm=draws.months;
+  document.getElementById('drawhead').innerHTML='<th>סוג אריזה</th>'
+    +dm.map(m=>`<th class="n">${ymLabel(m)}</th>`).join('')+'<th class="n">סה״כ</th>';
+  const dkeys=Object.keys(draws.packs).sort((a,b)=>(packOrder.indexOf(a)+1||99)-(packOrder.indexOf(b)+1||99));
+  document.getElementById('drawrows').innerHTML=dkeys.map(k=>{
+    const p=draws.packs[k], tot=dm.reduce((s,m)=>s+(p.total[m]||0),0);
+    return `<tr class="drow" data-dp="${k}"><td><span class="chev">▸</span> <b>${k}</b></td>`
+      +dm.map(m=>`<td class="n">${dz(p.total[m]||0)}</td>`).join('')
+      +`<td class="n"><b>${f(tot)}</b><span class="u">טון</span></td></tr>`
+      +`<tr class="ddetail" hidden><td colspan="${dm.length+2}" class="detail-cell">${drawContracts(k)}</td></tr>`;
+  }).join('');
+}else{
+  document.getElementById('drawhead').innerHTML='<th>סוג אריזה</th>';
+  document.getElementById('drawrows').innerHTML='<tr><td style="padding:16px;color:var(--muted)">אין נתוני משיכות — ודאו ש-draws_data.json נוצר.</td></tr>';
+}
 
 /* ===== per-contract drill-down ===== */
 function groupByMonth(no){const g=[],idx={};(months[no]||[]).forEach(x=>{if(!(x.m in idx)){idx[x.m]=g.length;g.push({m:x.m,lots:[]});}g[idx[x.m]].lots.push(x);});return g;}
@@ -342,11 +386,18 @@ document.getElementById('rows').addEventListener('click',e=>{
   const det=document.querySelector('.detail[data-d="'+row.dataset.c+'"]');if(!det)return;
   if(det.hasAttribute('hidden')){det.removeAttribute('hidden');row.classList.add('open');}else{det.setAttribute('hidden','');row.classList.remove('open');}
 });
-/* pack summary toggle */
-document.getElementById('packrows').addEventListener('click',e=>{
-  const row=e.target.closest('.prow');if(!row)return;
-  const det=row.nextElementSibling;if(!det||!det.classList.contains('pdetail'))return;
-  if(det.hasAttribute('hidden')){det.removeAttribute('hidden');row.classList.add('open');}else{det.setAttribute('hidden','');row.classList.remove('open');}
+/* monthly draws toggle: pack -> contracts -> documents */
+document.getElementById('drawrows').addEventListener('click',e=>{
+  const crow=e.target.closest('.crow2');
+  if(crow){const cd=crow.nextElementSibling;
+    if(cd&&cd.classList.contains('cdetail2')){
+      if(cd.hasAttribute('hidden')){cd.removeAttribute('hidden');crow.classList.add('open');}
+      else{cd.setAttribute('hidden','');crow.classList.remove('open');}}
+    return;}
+  const row=e.target.closest('.drow');if(!row)return;
+  const det=row.nextElementSibling;if(!det||!det.classList.contains('ddetail'))return;
+  if(det.hasAttribute('hidden')){det.removeAttribute('hidden');row.classList.add('open');}
+  else{det.setAttribute('hidden','');row.classList.remove('open');}
 });
 </script>
 </body>
