@@ -187,6 +187,7 @@ const HMON={3:'מרץ',5:'מאי',8:'אוגוסט',10:'אוקטובר',12:'דצ�
 let contracts=[];
 let months={};
 let packLast={};
+let DRAWS=null;
 
 function exOf(mstr){const [mm,yy]=mstr.split('/').map(Number);const c=EX_MONTHS.filter(v=>v<=mm);if(c.length)return {ex:c[c.length-1],exY:yy};return {ex:12,exY:yy-1};}
 function deadlineOf(ex,exY){let dm=ex-1,dy=exY;if(dm===0){dm=12;dy=exY-1;}return new Date(dy,dm-1,15);}
@@ -266,7 +267,7 @@ function packContractsTable(pack){
 const MN_SHORT=['','ינו','פבר','מרץ','אפר','מאי','יונ','יול','אוג','ספט','אוק','נוב','דצמ'];
 const ymLabel=ym=>{const [y,m]=ym.split('-').map(Number);return MN_SHORT[m]+" '"+String(y).slice(-2);};
 const dz=n=>n?f(n):'<span style="color:var(--faint)">—</span>';
-const draws=data.draws||null;
+const draws=DRAWS;
 
 function drawDocs(pack,con){
   const p=draws.packs[pack];
@@ -370,6 +371,7 @@ fetch('manager_data.json',{cache:'no-store'})
     contracts = d.contracts || [];
     months    = d.months || {};
     packLast  = d.pack_last || {};
+    DRAWS     = d.draws || null;
     const g=document.getElementById('genat'); if(g&&d.generated_at) g.textContent=d.generated_at;
     const s=document.getElementById('srcfile'); if(s&&d.supplier_file) s.textContent=d.supplier_file;
     render();
