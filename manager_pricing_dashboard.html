@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>קוקפיט תמחור — דוח מנהל</title>
+<title>מעקב תמחור ואספקה — סוכר</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Rubik:wght@500;600;700&display=swap" rel="stylesheet">
@@ -89,6 +89,16 @@
   .sdot.red{background:var(--red);box-shadow:0 0 0 3px rgba(200,65,42,.16)}
   .sdot.amber{background:var(--amber);box-shadow:0 0 0 3px rgba(208,138,30,.16)}
   .exposed{color:var(--amber);font-weight:600}
+  /* main-screen grouping + attention */
+  tr.packhdr td{background:#FAFBFD;color:var(--teal);font-weight:700;font-size:13px;text-align:right;padding:9px 22px;letter-spacing:.02em;border-bottom:1px solid var(--line)}
+  tr.subtot td{background:var(--hover);font-weight:700;border-top:1px solid var(--line);border-bottom:2px solid var(--line)}
+  tr.subtot td:first-child{color:var(--muted);font-size:13px;font-weight:600;text-align:right;padding-right:22px}
+  td.act{font-weight:700}
+  td.act.warn{color:var(--amber)}
+  td.act.hot{color:var(--red)}
+  .zeroq{color:var(--faint);font-weight:600}
+  .dashq{color:var(--faint)}
+  .ilsv2{color:var(--green,#1F8A54);font-weight:600}
   .pricev{font-family:"Rubik",system-ui,sans-serif;font-weight:700;font-size:17px}
   .pbar{width:90px;height:7px;border-radius:5px;background:var(--track);overflow:hidden;display:inline-block;vertical-align:middle;margin-inline-end:8px}
   .pbar>span{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-soft))}
@@ -136,7 +146,7 @@
   <header>
     <div>
       <div class="tag">דוח מנהל · החלטות תמחור וקנייה</div>
-      <h1>קוקפיט תמחור — סוכר</h1>
+      <h1>מעקב תמחור ואספקה — סוכר</h1>
       <div class="sub">ספק: <b>סוכרים (סי.אי.אס.טי) בע״מ</b> · חשבון <b>MIKI OZ ASAKIM</b></div>
     </div>
     <div class="asof">
@@ -147,6 +157,17 @@
 
   <div id="alertbar"></div>
 
+  <h2>מעקב לפי חוזה</h2>
+  <div class="sectsub">שורה לכל חוזה — כמויות (סופק · טרם סופק) ומחיר אחרון מ-SAP בזמן אמת · טרם תומחר מאקסל הספק. לחצו על חוזה לפירוט חודשי ומנות.</div>
+  <div class="panel"><div class="scroll">
+    <table>
+      <thead><tr>
+        <th>חוזה</th><th class="n">התחייבות</th><th class="n">סופק</th><th class="n">טרם סופק</th><th class="n">טרם תומחר</th><th class="n">מחיר אחרון ($)</th><th class="n">מחיר אחרון (₪)</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div></div>
+
   <h2>משיכות חודשיות לפי סוג אריזה</h2>
   <div class="sectsub">כמה נמשך בפועל בכל חודש — תעודות כניסה בניכוי החזרות, ישירות מ-SAP. לחצו על סוג אריזה לפילוח לפי חוזה · לחצו על חוזה לפירוט התעודות.</div>
   <div class="panel" style="margin-bottom:30px"><div class="scroll">
@@ -156,19 +177,16 @@
     </table>
   </div></div>
 
-  <h2>כרטיס תמחור לפי חוזה</h2>
-  <div class="sectsub">לחצו על חוזה לריכוז חודשי · לחצו על חודש לפירוט המנות (המחירים שמהם מורכב הממוצע).</div>
-  <div class="panel"><div class="scroll">
+  <h2>ריכוז לפי סוג אריזה</h2>
+  <div class="sectsub">איפה אתה עומד בכל אריזה — כמויות, אחוזי אספקה ותמחור, ומחיר אחרון.</div>
+  <div class="panel" style="margin-bottom:30px"><div class="scroll">
     <table>
       <thead><tr>
-        <th>חוזה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">סגור · טרם סופק</th><th class="n">מחיר פתוח</th><th class="n">פרמיה</th><th class="n">בורסה</th><th class="n">סה״כ מחיר</th><th class="n">שקלי</th><th class="n">סטטוס</th>
+        <th>אריזה</th><th class="n">התחייבות</th><th class="n">סופק</th><th class="n">טרם סופק</th><th class="n">% סופק</th><th class="n">טרם תומחר</th><th class="n">% תומחר</th><th class="n">מחיר אחרון</th>
       </tr></thead>
-      <tbody id="rows"></tbody>
+      <tbody id="packsum"></tbody>
     </table>
   </div></div>
-
-  <h2>סיכום כללי</h2>
-  <div class="strip" id="strip" style="margin-bottom:30px"></div>
 
   <div class="notes">
     <p><b>מחיר פתוח</b> = כמות שטרם תומחרה מול הבורסה — חשופה לתנודות מחיר. <b>סטטוס</b>: <b style="color:#BE7714">כתום</b> דדליין תוך 30 יום, <b style="color:#C8412A">אדום</b> תוך 15 יום או שעבר. כדאי לסגור מחיר לפחות 7 ימים לפני.</p>
@@ -231,26 +249,37 @@ const tP=contracts.reduce((s,c)=>s+c.priced,0);
 const tU=contracts.reduce((s,c)=>s+c.unpriced,0);
 const wAvg=Math.round(contracts.reduce((s,c)=>s+(c.price?c.price*c.priced:0),0)/tP);
 const urgent=ladder.filter(L=>daysTo(L.deadline)<=15).reduce((s,L)=>s+L.tons,0);
-document.getElementById('strip').innerHTML=`
-  <div class="stat"><div class="l">סך התחייבות</div><div class="v">${f(tC)}<u>טון</u></div></div>
-  <div class="div"></div>
-  <div class="stat"><div class="l">מתומחר</div><div class="v">${Math.round(tP/tC*100)}%<u>· ${f(tP)} טון</u></div></div>
-  <div class="div"></div>
-  <div class="stat"><div class="l">חשיפה לא־מתומחרת</div><div class="v warn">${f(tU)}<u>טון</u></div></div>
-  <div class="div"></div>
-  <div class="stat"><div class="l">דחוף (עבר/תוך 15 יום)</div><div class="v" style="color:var(--red)">${f(urgent)}<u>טון</u></div></div>
-  <div class="div"></div>
-  <div class="stat"><div class="l">מחיר נעול ממוצע</div><div class="v">${f(wAvg)}<u>$</u></div></div>`;
+/* ===== (old portfolio strip removed — replaced by rich pack summary below) ===== */
 
 /* ===== summary by pack type ===== */
 const packs={};
 contracts.forEach(c=>{
-  const p = packs[c.pack] || (packs[c.pack]={committed:0,shipped:0,open:0,unpriced:0,ps:0,pq:0});
-  p.committed+=c.committed; p.shipped+=c.shipped; p.open+=openQty(c); p.unpriced+=c.unpriced;
-  if(c.price){ p.ps+=c.price*c.priced; p.pq+=c.priced; }
+  const p = packs[c.pack] || (packs[c.pack]={committed:0,open:0,unpriced:0,lastDate:null,lastUsd:null,lastIls:null});
+  p.committed+=c.committed; p.open+=Math.max(0,openQty(c)); p.unpriced+=c.unpriced;
+  if(c.last_date && (!p.lastDate || c.last_date>p.lastDate)){ p.lastDate=c.last_date; p.lastUsd=c.last_usd; p.lastIls=c.last_ils; }
 });
 const packOrder=['25 ק"ג','BB · שקי ענק','1 ק"ג'];
 const packKeys=Object.keys(packs).sort((a,b)=>(packOrder.indexOf(a)+1||99)-(packOrder.indexOf(b)+1||99));
+/* rich pack summary (bottom) */
+document.getElementById('packsum').innerHTML=packKeys.map(k=>{
+  const p=packs[k];
+  const sofak=Math.max(0,p.committed-p.open), priced=Math.max(0,p.committed-p.unpriced);
+  const pctS=p.committed?Math.round(sofak/p.committed*100):0;
+  const pctP=p.committed?Math.round(priced/p.committed*100):0;
+  const price=(p.lastUsd!=null||p.lastIls!=null)
+     ? `${p.lastUsd!=null?'$'+p.lastUsd.toFixed(1):''}${(p.lastUsd!=null&&p.lastIls!=null)?' · ':''}${p.lastIls!=null?'₪'+f(p.lastIls):''}`
+     : '<span style="color:var(--faint)">—</span>';
+  return `<tr>
+    <td><b>${k}</b></td>
+    <td class="n">${f(p.committed)}<span class="u">טון</span></td>
+    <td class="n">${f(sofak)}<span class="u">טון</span></td>
+    <td class="n">${f(p.open)}<span class="u">טון</span></td>
+    <td class="n"><b>${pctS}%</b></td>
+    <td class="n exposed">${f(p.unpriced)}<span class="u">טון</span></td>
+    <td class="n"><b>${pctP}%</b></td>
+    <td class="n ilsv">${price}</td>
+  </tr>`;
+}).join('');
 function packContractsTable(pack){
   const cs=contracts.filter(c=>c.pack===pack);
   let h='<table class="sub"><thead><tr><th>חוזה</th><th class="n">סך כמות</th><th class="n">טרם סופק</th><th class="n">מחיר פתוח</th><th class="n">מחיר $</th><th class="n">שקלי ממוצע</th><th class="n">רכישה אחרונה</th><th class="n">סטטוס</th></tr></thead><tbody>';
@@ -333,24 +362,33 @@ function monthsTable(no){
   });
   return html+'</tbody></table>';
 }
-document.getElementById('rows').innerHTML=contracts.map(c=>{
-  const st=contractStatus(c.no);
-  const chip = st==='red'?'<span class="stat-chip red">דחוף</span>':st==='amber'?'<span class="stat-chip amber">מתקרב</span>':'<span class="stat-chip ok">תקין</span>';
-  const board = c.price!=null ? c.price - c.prem : null;
-  return `<tr class="crow ${st?'rk-'+st:''} ${isPast(c)?'past':''}" data-c="${c.no}">
-    <td><div class="cno"><span class="chev">▸</span><span class="sdot ${st||''}"></span>${c.no}</div><div class="cpack">${c.pack}</div></td>
-    <td class="n">${f(c.committed)}<span class="u">טון</span></td>
-    <td class="n">${f(openQty(c))}<span class="u">טון</span></td>
-    <td class="n">${f(Math.max(0,openQty(c)-c.unpriced))}<span class="u">טון</span></td>
-    <td class="n exposed">${f(c.unpriced)}<span class="u">טון</span></td>
-    <td class="n">${c.prem}<span class="u">$</span></td>
-    <td class="n">${board!=null?f(board)+'<span class="u">$</span>':'—'}</td>
-    <td class="n"><span class="pricev">${c.price!=null?f(c.price):'—'}</span>${c.price!=null?'<span class="u">$</span>':''}</td>
-    <td class="n"><span class="ilsv">${c.ils!=null?f(c.ils):'—'}</span>${c.ils!=null?'<span class="u">₪</span>':''}${(function(){const lp=packLast[c.pack];return lp!=null?'<div class="subils">אחרונה: '+f(lp)+' ₪</div>':'';})()}</td>
-    <td class="n">${chip}</td>
-  </tr>
-  <tr class="detail" data-d="${c.no}" hidden><td colspan="10" class="detail-cell">${monthsTable(c.no)}</td></tr>`;
-}).join('');
+(function(){
+  let html='';
+  packKeys.forEach(pk=>{
+    const cs=contracts.filter(c=>c.pack===pk);
+    if(!cs.length)return;
+    let sC=0,sS=0,sO=0,sU=0;
+    html+=`<tr class="packhdr"><td colspan="7">${pk}</td></tr>`;
+    cs.forEach(c=>{
+      const open=Math.max(0,openQty(c)), sofak=Math.max(0,c.committed-open);
+      sC+=c.committed; sS+=sofak; sO+=open; sU+=c.unpriced;
+      const openHot=open>=400, openWarn=open>=150&&open<400;
+      const unHot=c.unpriced>=500, unWarn=c.unpriced>=200&&c.unpriced<500;
+      html+=`<tr class="crow ${isPast(c)?'past':''}" data-c="${c.no}">
+        <td><div class="cno"><span class="chev">▸</span>${c.no}</div></td>
+        <td class="n">${f(c.committed)}<span class="u">טון</span></td>
+        <td class="n">${f(sofak)}<span class="u">טון</span></td>
+        <td class="n act ${openHot?'hot':openWarn?'warn':''}">${open<=0?'<span class="zeroq">0</span>':f(open)+'<span class="u">טון</span>'}</td>
+        <td class="n act ${unHot?'hot':unWarn?'warn':''}">${c.unpriced<=0?'<span class="zeroq">0</span>':f(c.unpriced)+'<span class="u">טון</span>'}</td>
+        <td class="n">${c.last_usd!=null?'<span class="pricev">$'+c.last_usd.toFixed(1)+'</span>':'<span class="dashq">—</span>'}</td>
+        <td class="n">${c.last_ils!=null?'<span class="ilsv">₪'+f(c.last_ils)+'</span>':'<span class="dashq">—</span>'}</td>
+      </tr>
+      <tr class="detail" data-d="${c.no}" hidden><td colspan="7" class="detail-cell">${monthsTable(c.no)}</td></tr>`;
+    });
+    html+=`<tr class="subtot"><td>סה״כ ${pk}</td><td class="n">${f(sC)}<span class="u">טון</span></td><td class="n">${f(sS)}<span class="u">טון</span></td><td class="n">${f(sO)}<span class="u">טון</span></td><td class="n">${f(sU)}<span class="u">טון</span></td><td></td><td></td></tr>`;
+  });
+  document.getElementById('rows').innerHTML=html;
+})();
 
 /* alert banner */
 (function(){
